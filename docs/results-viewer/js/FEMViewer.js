@@ -92,7 +92,7 @@ class FEMViewer {
 		this.dinamycColors = false;
 		this.lut = new Lut();
 
-		this.gui = new GUI({ title: "Configuraciones" });
+		this.gui = new GUI({ title: "Settings" });
 		this.gui.close();
 		this.first_color = [78 / 255, 51 / 255, 255 / 255];
 		//248 / 360, 184 / 360
