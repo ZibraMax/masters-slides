@@ -1,7 +1,8 @@
 import { FEMViewer } from "./FEMViewer.js";
 import { GraphViewer } from "./GraphViewer.js";
 
-let path_str = "../../../results/defaultGeo.json";
+let path_str =
+	"https://raw.githubusercontent.com/ZibraMax/masters-slides/main/results/defaultGeo.json";
 let magnif = 30;
 let path = `${path_str}`;
 const canvas = document.getElementById("model-view");
