@@ -16,6 +16,12 @@ class GraphViewer {
 			yaxis: {
 				title: "$\\eta [-]$",
 			},
+			legend: {
+				x: 1,
+				xanchor: "right",
+				y: 1,
+				font: { size: 12 },
+			},
 		};
 
 		this.config = { responsive: true };
