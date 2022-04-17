@@ -49,6 +49,9 @@ class GraphViewer {
 			await this.FEMViewer.loadJSON(jsonpath);
 			this.FEMViewer.init();
 			this.FEMViewer.setStep(6);
+			document.getElementById("textNodo").innerHTML = `Mode ${
+				this.FEMViewer.step + 1
+			}`;
 		}
 	}
 
