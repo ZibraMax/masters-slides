@@ -84,7 +84,7 @@ class FEMViewer {
 		this.mult = 1.0;
 		this.side = 1.0;
 		this.max_disp = 0.0;
-		this.draw_lines = false;
+		this.draw_lines = true;
 
 		this.mode = "MAX";
 		this.colorMode = "DISP";
@@ -97,7 +97,6 @@ class FEMViewer {
 		this.first_color = [78 / 255, 51 / 255, 255 / 255];
 		//248 / 360, 184 / 360
 		this.second_color = [255 / 255, 51 / 255, 51 / 255];
-		this.stop = false;
 		this.settings();
 	}
 	defineElasticityTensor(C) {
@@ -112,6 +111,8 @@ class FEMViewer {
 		this.parseJSON(jsondata);
 	}
 	reset() {
+		this.animate = false;
+
 		for (let i = 0; i < this.elements.length; i++) {
 			this.elements[i].geometry.dispose();
 			this.bufferGeometries.pop().dispose();
@@ -119,17 +120,25 @@ class FEMViewer {
 		}
 		this.model.remove(this.mesh);
 		this.model.remove(this.contour);
+
 		this.mergedGeometry.dispose();
 		this.mergedLineGeometry.dispose();
 		this.mesh.geometry.dispose();
 		this.mesh.material.dispose();
 		this.contour.geometry.dispose();
 		this.contour.material.dispose();
+
 		this.renderer.renderLists.dispose();
-		console.log(this.bufferGeometries);
 		this.bufferGeometries = [];
 		this.bufferLines = [];
-		this.stop = true;
+
+		this.nodes = [];
+		this.dictionary = [];
+		this.solutions = [];
+		this.step = 0;
+		this.U = undefined;
+		this.elements = [];
+		this.types = [];
 	}
 
 	settings() {
@@ -162,48 +171,28 @@ class FEMViewer {
 
 		// GUI
 		this.gui
-			.add(this.camera, "fov", 1, 180)
-			.name("Camera FOV")
-			.onChange(this.updateCamera.bind(this));
-		this.gui
 			.add(this, "draw_lines")
 			.onChange(this.updateLines.bind(this))
 			.name("Draw lines");
 
 		// ESTO ES SOLO PARA DESPLAZAMIENTOS ESPECIFICAMENTE
-		this.gui
-			.add(this, "colors")
-			.name("Draw Colors")
-			.onChange(this.updateMaterial.bind(this));
-		this.gui
-			.add(this, "mode", { Max: "MAX", Min: "MIN", Average: "AVE" })
-			.onChange(this.updateColorVariable.bind(this))
-			.name("Color mode");
-		this.gui
-			.add(this, "colorMode", {
-				Displacements: "DISP",
-				Stress: "STRESS",
-				Strain: "STRAIN",
-			})
-			.onChange(this.updateColorVariable.bind(this))
-			.name("Color variable");
-		this.gui
-			.add(this, "secondVariable", {
-				11: 0,
-				22: 1,
-				33: 2,
-				12: 3,
-				13: 4,
-				23: 5,
-			})
-			.onChange(this.updateColorVariable.bind(this))
-			.name("Second variable");
 
-		this.gui.addColor(this, "first_color").name("Base color");
-		this.gui.addColor(this, "second_color").name("Max color");
-		this.gui.add(this, "animate").name("Animation");
-		this.gui.add(this, "dinamycColors").name("Colors animation");
-		this.gui.add(this, "magnif", 0, 1000).name("Disp multiplier");
+		this.gui
+			.add(this, "animate")
+			.name("Animation")
+			.onChange(() => {
+				if (!this.animate) {
+					this.mult = 1.0;
+					this.updateMeshCoords();
+				}
+			});
+
+		this.gui
+			.add(this, "magnif", 0, 1000)
+			.name("Disp multiplier")
+			.onChange(() => {
+				this.updateMeshCoords();
+			});
 	}
 	updateColorVariable() {
 		for (const e of this.elements) {
@@ -232,7 +221,6 @@ class FEMViewer {
 		this.max_disp = this.max_disp;
 		this.lut.setMax(max_disp);
 		this.lut.setMin(min_disp);
-		console.log(max_disp, min_disp);
 	}
 	updateCamera() {
 		this.camera.updateProjectionMatrix();
@@ -266,7 +254,7 @@ class FEMViewer {
 	update() {
 		requestAnimationFrame(this.update.bind(this));
 		this.delta += this.clock.getDelta();
-		if (this.delta > this.interval && !this.stop) {
+		if (this.delta > this.interval) {
 			// The draw or time dependent code are here
 			this.render(this.delta);
 
@@ -285,31 +273,7 @@ class FEMViewer {
 		}
 		return needResize;
 	}
-
-	render(time) {
-		if (typeof time == "number") {
-			time = time || 0;
-		} else {
-			time = 0.0;
-		}
-		this.mult += time * this.side;
-		if (this.mult > 1) {
-			this.side = -1.0;
-			this.mult = 1.0;
-		} else if (this.mult < -1) {
-			this.side = 1.0;
-			this.mult = -1.0;
-		}
-		if (!this.animate) {
-			this.mult = 1.0;
-		}
-
-		// console.log(this.mult);
-
-		// Specific part of shit
-		if (this.animate) {
-		}
-
+	updateMeshCoords() {
 		for (let i = 0; i < this.elements.length; i++) {
 			const e = this.elements[i];
 			const Ue = [];
@@ -372,7 +336,32 @@ class FEMViewer {
 			);
 			this.contour.geometry = this.mergedLineGeometry;
 		}
+	}
 
+	render(time) {
+		if (typeof time == "number") {
+			time = time || 0;
+		} else {
+			time = 0.0;
+		}
+		this.mult += time * this.side;
+		if (this.mult > 1) {
+			this.side = -1.0;
+			this.mult = 1.0;
+		} else if (this.mult < -1) {
+			this.side = 1.0;
+			this.mult = -1.0;
+		}
+		if (!this.animate) {
+			this.mult = 1.0;
+		}
+
+		// console.log(this.mult);
+
+		// Specific part of shit
+		if (this.animate) {
+			this.updateMeshCoords();
+		}
 		if (this.resizeRendererToDisplaySize()) {
 			const canvas = this.renderer.domElement;
 			this.camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -417,9 +406,9 @@ class FEMViewer {
 
 	updateLines() {
 		if (this.draw_lines) {
-			this.scene.add(this.contour);
+			this.model.add(this.contour);
 		} else {
-			this.scene.remove(this.contour);
+			this.model.remove(this.contour);
 		}
 	}
 
@@ -452,8 +441,14 @@ class FEMViewer {
 		this.scene.add(this.model);
 		this.renderer.render(this.scene, this.camera);
 		this.zoomExtents();
+		this.updateLines();
 		window.addEventListener("resize", this.render.bind(this));
 		requestAnimationFrame(this.update.bind(this));
+	}
+	setStep(step) {
+		this.step = step;
+		this.updateU();
+		this.updateMeshCoords();
 	}
 
 	parseJSON(jsondata) {
@@ -525,10 +520,12 @@ class FEMViewer {
 	nextSolution() {
 		this.step += 1 * (this.step < this.solutions.length - 1);
 		this.updateU();
+		this.updateMeshCoords();
 	}
 	prevSolution() {
 		this.step -= 1 * (this.step > 0);
 		this.updateU();
+		this.updateMeshCoords();
 	}
 
 	createElements() {
