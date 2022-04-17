@@ -1,0 +1,63 @@
+html, body {
+	margin:0px;
+	height:100%;
+}
+
+.box {
+	height:100%;
+}
+.side-pane {
+	width: 50%;
+	float: left;
+}
+.box-red {
+	background:red;
+}
+.box-blue {
+	background:blue;
+}
+.floatButton1 {
+	position: fixed;
+	width: 60px;
+	height: 60px;
+	bottom: 40px;
+	right: 40px;
+	background-color: #ff851b;
+	color: #fff;
+	border-radius: 50px;
+	text-align: center;
+	box-shadow: 2px 2px 3px #999;
+}
+.floatButton {
+	position: fixed;
+	width: 60px;
+	height: 60px;
+	bottom: 40px;
+	right: 110px;
+	background-color: #ff851b;
+	color: #fff;
+	border-radius: 50px;
+	text-align: center;
+	box-shadow: 2px 2px 3px #999;
+}
+
+.floatText {
+	position: fixed;
+	width: 60px;
+	height: 60px;
+	bottom: 110px;
+	right: 110px;
+	background-color: #ff851b;
+	color: #fff;
+	border-radius: 50px;
+	text-align: center;
+	box-shadow: 2px 2px 3px #999;
+}
+
+#btns {
+	display: block;
+}
+
+.my-float {
+	margin-top: 22px;
+}

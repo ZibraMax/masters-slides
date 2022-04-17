@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<script
+			src="https://kit.fontawesome.com/2416ed6962.js"
+			crossorigin="anonymous"
+		></script>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>results-viewer</title>
+		<link rel="stylesheet" href="./css/index.css" />
+	</head>
+	<body>
+		<div class="box">
+			<div class="box side-pane box-blue" id="graph-view"></div>
+			<canvas class="box side-pane box-red" id="model-view"></canvas>
+			<div id="btns">
+				<a class="floatText">
+					<i
+						id="textNodo"
+						class="fa my-float"
+						style="
+							font-family: 'Franklin Gothic Medium',
+								'Arial Narrow', Arial, sans-serif;
+						"
+						>Solución 1</i
+					>
+				</a>
+				<a class="floatButton" id="bl">
+					<i class="fa fa-angle-left my-float"></i>
+				</a>
+				<a class="floatButton1" id="br">
+					<i class="fa fa-angle-right my-float"></i>
+				</a>
+			</div>
+		</div>
+		<script src="./js/index.js" type="module"></script>
+		<script src="./js/build/math.js"></script>
+	</body>
+</html>
