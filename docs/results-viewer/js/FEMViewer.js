@@ -135,7 +135,7 @@ class FEMViewer {
 		this.nodes = [];
 		this.dictionary = [];
 		this.solutions = [];
-		this.step = 0;
+		this.step = 7;
 		this.U = undefined;
 		this.elements = [];
 		this.types = [];
