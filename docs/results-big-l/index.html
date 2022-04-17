@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="generator" content="pandoc" />
+		<title>Resultados con l grandes</title>
+		<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+		<script
+			id="MathJax-script"
+			async
+			src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+		></script>
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta
+			name="apple-mobile-web-app-status-bar-style"
+			content="black-translucent"
+		/>
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/reveal.js@^4//dist/reset.css"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/reveal.js@^4//dist/reveal.css"
+		/>
+		<style>
+			code {
+				white-space: pre-wrap;
+			}
+			span.smallcaps {
+				font-variant: small-caps;
+			}
+			span.underline {
+				text-decoration: underline;
+			}
+			div.column {
+				display: inline-block;
+				vertical-align: top;
+				width: 50%;
+			}
+			div.hanging-indent {
+				margin-left: 1.5em;
+				text-indent: -1.5em;
+			}
+			ul.task-list {
+				list-style: none;
+			}
+			.display.math {
+				display: block;
+				text-align: center;
+				margin: 0.5rem auto;
+			}
+		</style>
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/reveal.js@^4//dist/theme/white.css"
+			id="theme"
+		/>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section id="title-slide">
+					<h1 class="title">Resultados con l grandes</h1>
+				</section>
+
+				<section>
+					<section
+						id="resultados-usando-l-grandes"
+						class="title-slide slide level2"
+						data-heading="Resultados usando l grandes"
+					>
+						<h2 data-heading="Resultados usando l grandes">
+							Resultados usando l grandes
+						</h2>
+					</section>
+					<section
+						id="resultados-anteriores"
+						class="slide level3"
+						data-heading="Resultados anteriores"
+					>
+						<h3 data-heading="Resultados anteriores">
+							Resultados anteriores
+						</h3>
+						<h4
+							data-heading="Gráfica de ajuste"
+							id="gráfica-de-ajuste"
+						>
+							Gráfica de ajuste
+						</h4>
+						<p>
+							<img
+								data-src=".\adjuntos\Pasted%20image%2020220408001948.png"
+								class="internal-embed"
+								width="600"
+							/><br />
+							** Todos los resultados usando
+							<span class="math math-inline is-loaded"
+								><span class="math inline"
+									><em>ζ</em> = 0.5</span
+								></span
+							>
+						</p>
+					</section>
+					<section class="slide level3">
+						<h4
+							data-heading="Gráfica de $\zeta_1$"
+							id="gráfica-de-zeta_1"
+						>
+							Gráfica de
+							<span class="math math-inline is-loaded"
+								><span class="math inline"
+									><em>ζ</em><sub>1</sub></span
+								></span
+							>
+						</h4>
+						<p>
+							Variación de las
+							<strong>frecuencia</strong> cambiando el
+							<span class="math math-inline is-loaded"
+								><span class="math inline"
+									><em>ζ</em><sub>1</sub></span
+								></span
+							>
+							para
+							<strong
+								>distintos valores de
+								<span class="math math-inline is-loaded"
+									><span class="math inline"
+										><em>R</em></span
+									></span
+								></strong
+							>
+							usando
+							<span class="math math-inline is-loaded"
+								><span class="math inline"
+									><em>l</em> = 0.4</span
+								></span
+							><br />
+							<img
+								data-src=".\adjuntos\Pasted%20image%2020220408005148.png"
+								class="internal-embed"
+								width="600"
+							/>
+						</p>
+					</section>
+					<section
+						id="resultados-nuevos"
+						class="slide level3"
+						data-heading="Resultados nuevos"
+					>
+						<h3 data-heading="Resultados nuevos">
+							Resultados nuevos
+						</h3>
+						<p>
+							Para las simulaciones se tienen las siguientes
+							características:
+						</p>
+						<ul>
+							<li>
+								l=2:
+								<ul>
+									<li>1000 elementos (10x10x10)</li>
+									<li>3993 grados de libertad</li>
+								</ul>
+							</li>
+							<li>
+								l=3, l=4, l=5:
+								<ul>
+									<li>729 elementos (9x9x9)</li>
+									<li>3000 grados de libertad</li>
+								</ul>
+							</li>
+						</ul>
+					</section>
+					<section class="slide level3">
+						<p>
+							Para encontrar los resultados con diferentes valores
+							de
+							<span class="math math-inline is-loaded"
+								><span class="math inline"
+									><em>ζ</em><sub>1</sub></span
+								></span
+							>
+							se necesitan guardar los valores originales de la
+							matriz. Es decir, yo estoy guardando un arreglo que
+							contiene los i, otro que contiene los j y otro que
+							contiene los valores de la matriz general. Por
+							último guardo uno que contiene los valores de z para
+							cada casilla del arreglo de valores.
+						</p>
+						<p>
+							Estos valores traen repetidos (según la conexión de
+							elementos lo necesite) y posteriormente son
+							"compilados" en una matriz dispersa.
+						</p>
+					</section>
+					<section class="slide level3">
+						<p>
+							Si guardara los valores directamente en la matriz
+							sería imposible asignar un coeficiente z variable.
+							La alternativa es tener dos matrices de rigidez
+							(local y no local). Pero no se hasta que punto esto
+							sea eficiente.
+						</p>
+						<p>
+							Intenté usar 10x10x10 en todos los casos pero para l
+							= 3 no fue posible obtener resultado (Memory Error)
+						</p>
+					</section>
+					<section class="slide level3">
+						<h4
+							data-heading="Gráficas de $\zeta_1$"
+							id="gráficas-de-zeta_1"
+						>
+							Gráficas de
+							<span class="math math-inline is-loaded"
+								><span class="math inline"
+									><em>ζ</em><sub>1</sub></span
+								></span
+							>
+						</h4>
+						<p>
+							<img
+								data-src=".\adjuntos\Pasted%20image%2020220415081659.png"
+								class="internal-embed"
+								width="600"
+							/>
+						</p>
+					</section>
+					<section class="slide level3">
+						<p>
+							<img
+								data-src=".\adjuntos\Pasted%20image%2020220415081727.png"
+								class="internal-embed"
+								width="600"
+							/>
+						</p>
+					</section>
+					<section class="slide level3">
+						<p>
+							<img
+								data-src=".\adjuntos\Pasted%20image%2020220415081748.png"
+								class="internal-embed"
+								width="600"
+							/>
+						</p>
+					</section>
+					<section class="slide level3">
+						<p>
+							<img
+								data-src=".\adjuntos\Pasted%20image%2020220415081811.png"
+								class="internal-embed"
+								width="600"
+							/>
+						</p>
+					</section>
+					<section class="slide level3">
+						<p>
+							Mientras <strong>mayor</strong> es el valor de
+							<span class="math math-inline is-loaded"
+								><span class="math inline"
+									><em>l</em></span
+								></span
+							>
+							<strong>menor</strong> es el efecto del valor de
+							<span class="math math-inline is-loaded"
+								><span class="math inline"
+									><em>ζ</em><sub>1</sub></span
+								></span
+							>. Este comportamiento puede ser clave para
+							<strong>calibrar</strong> porque el parámetro
+							<strong
+								><span class="math math-inline is-loaded"
+									><span class="math inline"
+										><em>ζ</em><sub>1</sub></span
+									></span
+								>
+								perdería importancia</strong
+							>!!!!!!!!!!!!!. En otras palabras, el cambio de
+							pendiente que se le atribuye al
+							<span class="math math-inline is-loaded"
+								><span class="math inline"
+									><em>ζ</em><sub>1</sub></span
+								></span
+							>
+							es menor que al que se le atribuye al
+							<span class="math math-inline is-loaded"
+								><span class="math inline"
+									><em>l</em></span
+								></span
+							>
+						</p>
+					</section>
+					<section class="slide level3">
+						<p>
+							Mismos resultados pero variando
+							<span class="math math-inline is-loaded"
+								><span class="math inline"
+									><em>l</em></span
+								></span
+							>
+							en lugar de
+							<span class="math math-inline is-loaded"
+								><span class="math inline"
+									>1/<em>R</em></span
+								></span
+							>
+							muestran la calibración posible.<br />
+							<img
+								data-src=".\adjuntos\Pasted%20image%2020220415081849.png"
+								class="internal-embed"
+								width="600"
+							/>
+						</p>
+					</section>
+					<section class="slide level3">
+						<p>
+							<img
+								data-src=".\adjuntos\Pasted%20image%2020220415081908.png"
+								class="internal-embed"
+								width="600"
+							/>
+						</p>
+					</section>
+					<section class="slide level3">
+						<p>
+							<img
+								data-src=".\adjuntos\Pasted%20image%2020220415081923.png"
+								class="internal-embed"
+								width="600"
+							/>
+						</p>
+					</section>
+					<section class="slide level3">
+						<p>
+							<img
+								data-src=".\adjuntos\Pasted%20image%2020220415081945.png"
+								class="internal-embed"
+								width="600"
+							/>
+						</p>
+					</section>
+					<section class="slide level3">
+						<h4
+							data-heading="Curvas de calibración completas"
+							id="curvas-de-calibración-completas"
+						>
+							Curvas de calibración completas
+						</h4>
+						<iframe
+							style="height: 600px; width: 100%"
+							src="https://zibramax.github.io/masters-slides/docs/results-viewer/"
+						>
+						</iframe>
+					</section>
+					<section class="slide level3">
+						<p>
+							Comparando estos resultados con los anteriores queda
+							así:<br />
+							<img
+								data-src=".\adjuntos\Pasted%20image%2020220415192332.png"
+								class="internal-embed"
+								width="600"
+							/>
+						</p>
+						<p>
+							<img
+								data-src="https://twemoji.maxcdn.com/v/13.1.0/72x72/1f62d.png"
+								class="emoji"
+								alt="😭"
+							/>
+						</p>
+					</section>
+				</section>
+			</div>
+		</div>
+
+		<script src="https://unpkg.com/reveal.js@^4//dist/reveal.js"></script>
+
+		// reveal.js plugins
+		<script src="https://unpkg.com/reveal.js@^4//plugin/notes/notes.js"></script>
+		<script src="https://unpkg.com/reveal.js@^4//plugin/search/search.js"></script>
+		<script src="https://unpkg.com/reveal.js@^4//plugin/zoom/zoom.js"></script>
+
+		<script>
+			// Full list of configuration options available at:
+			// https://revealjs.com/config/
+			Reveal.initialize({
+				// Push each slide change to the browser history
+				history: true,
+				width: "100%",
+				height: "100%",
+
+				// reveal.js plugins
+				plugins: [RevealNotes, RevealSearch, RevealZoom],
+			});
+		</script>
+	</body>
+</html>
