@@ -504,7 +504,6 @@ class FEMViewer {
 		}
 		this.size =
 			Math.max(...this.nodes.flat()) - Math.min(...this.nodes.flat());
-		this.animate = true;
 	}
 
 	updateU() {
