@@ -7,7 +7,7 @@ class GraphViewer {
 		// this.data.push(trace1);
 
 		this.layout = {
-			title: { text: "Click in point", font: { size: 18 } },
+			title: { text: "Click in point to show modes", font: { size: 18 } },
 			font: { size: 18 },
 			hovermode: "closest",
 			xaxis: {
@@ -26,6 +26,19 @@ class GraphViewer {
 
 		this.config = { responsive: true };
 		Plotly.newPlot(this.div, this.data, this.layout, this.config);
+	}
+
+	changeZ(z) {
+		this.z = z;
+		this.init(z);
+		const trace = {
+			x: [0.062277527, 0.078879991, 0.107473265, 0.168512597],
+			y: [1.689873418, 1.613924051, 1.379746835, 0.930379747],
+			type: "scatter",
+			line: { shape: "spline", dash: "dot" },
+			name: "Ramirez (2006)",
+		};
+		this.addTrace(trace);
 	}
 
 	async onClick(e) {
@@ -75,6 +88,7 @@ class GraphViewer {
 				]);
 			}
 		}
+		this.data = [];
 		for (const l of ls) {
 			this.dict[`${l}`].sort();
 			const sdata = this.dict[`${l}`][0].map((_, colIndex) =>

@@ -8,6 +8,7 @@ let path = `${path_str}`;
 const canvas = document.getElementById("model-view");
 const grafica = document.getElementById("graph-view");
 const nodoTexto = document.getElementById("textNodo");
+const select = document.getElementById("zselect");
 
 const O = new FEMViewer(canvas, magnif);
 await O.loadJSON(path);
@@ -35,6 +36,11 @@ const trace = {
 };
 OG.addTrace(trace);
 OG.div.on("plotly_click", OG.onClick.bind(OG));
+
+select.addEventListener("change", () => {
+	OG.changeZ(parseFloat(select.value));
+	OG.div.on("plotly_click", OG.onClick.bind(OG));
+});
 
 const bl = document.getElementById("bl");
 const br = document.getElementById("br");
