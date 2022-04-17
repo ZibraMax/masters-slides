@@ -61,3 +61,10 @@ html, body {
 .my-float {
 	margin-top: 22px;
 }
+@media (max-width:1260px) {
+	.side-pane {
+		height: 50%;
+		width: 100%;
+		float: none;
+	}
+}
