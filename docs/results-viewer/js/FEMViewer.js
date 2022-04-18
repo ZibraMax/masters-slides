@@ -172,6 +172,7 @@ class FEMViewer {
 		// GUI
 		this.gui
 			.add(this, "draw_lines")
+			.listen()
 			.onChange(this.updateLines.bind(this))
 			.name("Draw lines");
 
@@ -180,6 +181,7 @@ class FEMViewer {
 		this.gui
 			.add(this, "animate")
 			.name("Animation")
+			.listen()
 			.onChange(() => {
 				if (!this.animate) {
 					this.mult = 1.0;
@@ -413,6 +415,7 @@ class FEMViewer {
 	}
 
 	init() {
+		this.animate = true;
 		this.createElements();
 		this.createLines();
 		this.updateU();
