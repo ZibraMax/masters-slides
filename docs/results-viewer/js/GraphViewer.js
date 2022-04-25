@@ -71,6 +71,7 @@ class GraphViewer {
 			const l = trace[1];
 			const z = trace[2];
 			const L = trace[3];
+			const text = trace[trace.length - 1];
 			const eta = trace[6];
 			const R = trace[7];
 			if (z == this.z) {
@@ -82,13 +83,7 @@ class GraphViewer {
 				const str_z = "" + z.toFixed(3);
 				var str_L = "" + L.toFixed(3);
 				str_L = str_L.split(".");
-				this.dict[`${l}`].push([
-					1 / R,
-					eta,
-					`SiCube_l${str_l[0]}_${str_l[2]}_${str_z[0]}_${
-						str_z[2] + str_z[3] + str_z[4]
-					}_L_${str_L[0]}_${str_L[1]}.json`,
-				]);
+				this.dict[`${l}`].push([1 / R, eta, text]);
 			}
 		}
 		this.data = [];

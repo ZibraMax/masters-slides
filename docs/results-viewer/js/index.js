@@ -21,8 +21,7 @@ document.addEventListener("visibilitychange", (e) =>
 	O.handleVisibilityChange(e)
 );
 
-const path_index =
-	"https://raw.githubusercontent.com/ZibraMax/masters-slides/main/results/index.csv";
+const path_index = "../../../results/index.csv";
 const OG = new GraphViewer(grafica, O);
 await OG.loadResultsIndex(path_index);
 OG.init(0.3);
