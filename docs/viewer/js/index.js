@@ -26,27 +26,6 @@ const O = new FEMViewer(canvas, magnif);
 await O.loadJSON(path);
 O.init();
 O.setStep(6);
-
-nodoTexto.innerHTML = `Mode ${O.step + 1}`;
 document.addEventListener("visibilitychange", (e) =>
 	O.handleVisibilityChange(e)
-);
-
-const bl = document.getElementById("bl");
-const br = document.getElementById("br");
-bl.addEventListener(
-	"click",
-	() => {
-		O.prevSolution();
-		nodoTexto.innerHTML = `Mode ${O.step + 1}`;
-	},
-	false
-);
-br.addEventListener(
-	"click",
-	() => {
-		O.nextSolution();
-		nodoTexto.innerHTML = `Mode ${O.step + 1}`;
-	},
-	false
 );
