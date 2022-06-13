@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<script
+			src="https://kit.fontawesome.com/2416ed6962.js"
+			crossorigin="anonymous"
+		></script>
+		<script src="https://cdn.plot.ly/plotly-2.11.1.min.js"></script>
+		<script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
+
+		<script src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>results-viewer</title>
+		<link rel="stylesheet" href="./css/index.css" />
+	</head>
+	<body>
+		<div class="box">
+			<canvas class="box side-pane" id="model-view"></canvas>
+			<div id="btns">
+				<a class="floatText">
+					<i
+						id="textNodo"
+						class="fa my-float"
+						style="
+							font-family: 'Franklin Gothic Medium',
+								'Arial Narrow', Arial, sans-serif;
+						"
+						>Mode 7</i
+					>
+				</a>
+				<a class="floatButton" id="bl">
+					<i class="fa fa-angle-left my-float"></i>
+				</a>
+				<a class="floatButton1" id="br">
+					<i class="fa fa-angle-right my-float"></i>
+				</a>
+			</div>
+		</div>
+		<script src="./js/index.js" type="module"></script>
+		<script src="./js/build/math.js"></script>
+	</body>
+</html>
