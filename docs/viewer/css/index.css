@@ -1,6 +1,7 @@
-html, body {
-	margin:0px;
-	height:100%;
+html,
+body {
+	margin: 0px;
+	height: 100%;
 }
 
 .box {
@@ -11,10 +12,10 @@ html, body {
 	float: left;
 }
 .box-red {
-	background:red;
+	background: red;
 }
 .box-blue {
-	background:blue;
+	background: blue;
 }
 .floatButton1 {
 	position: fixed;
@@ -63,23 +64,29 @@ html, body {
 }
 
 body {
-	font-family: 'Roboto', sans-serif;
+	font-family: "Roboto", sans-serif;
 }
 
 .selectdiv select {
-    /* Add some styling */
-    display: block;
-    position: relative;
-    width: 100%;
-    height: 60px;
-    margin: 5px 0px;
-    padding: 0px 24px;
-    font-size: 16px;
-    line-height: 1.75;
-    color: #333;
-    background-color: #ffffff;
-    background-image: none;
-    border: 1px solid #cccccc;
-    -ms-word-break: normal;
-    word-break: normal;
+	/* Add some styling */
+	display: block;
+	position: relative;
+	width: 100%;
+	height: 60px;
+	margin: 5px 0px;
+	padding: 0px 24px;
+	font-size: 16px;
+	line-height: 1.75;
+	color: #333;
+	background-color: #ffffff;
+	background-image: none;
+	border: 1px solid #cccccc;
+	-ms-word-break: normal;
+	word-break: normal;
+}
+.closed {
+	opacity: 0;
+}
+.open {
+	opacity: 1;
 }
