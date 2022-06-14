@@ -1,4 +1,5 @@
 import { FEMViewer } from "./FEMViewer.js";
+let magnif = 600;
 
 let path_str =
 	"https://raw.githubusercontent.com/ZibraMax/masters-slides/main/results/SiCube_l3_0_0_500_L_25_884.json";
@@ -18,7 +19,6 @@ if (queryString != "") {
 }
 let path = path_str;
 
-let magnif = 600;
 const canvas = document.getElementById("model-view");
 const nodoTexto = document.getElementById("textNodo");
 
