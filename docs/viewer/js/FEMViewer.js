@@ -237,8 +237,8 @@ class FEMViewer {
 			this.light.intensity = 0.0;
 		} else {
 			this.material = new THREE.MeshLambertMaterial({
-				color: "#c4bbfc",
-				emissive: "blue",
+				color: "#dc2c41",
+				emissive: "#dc2c41",
 			});
 			this.light2.intensity = 0.0;
 			this.light.intensity = 1.0;
