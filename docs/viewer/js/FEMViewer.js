@@ -171,11 +171,7 @@ class FEMViewer {
 		this.scene.add(this.light2);
 
 		// GUI
-		this.gui
-			.add(this, "draw_lines")
-			.listen()
-			.onChange(this.updateLines.bind(this))
-			.name("Draw lines");
+		this.gui.add(this, "rot").name("Rotation").listen();
 
 		// ESTO ES SOLO PARA DESPLAZAMIENTOS ESPECIFICAMENTE
 
