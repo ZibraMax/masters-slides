@@ -50,12 +50,13 @@ class FEMViewer {
 	camera;
 	scene;
 	controls;
-	constructor(canvas, magnif) {
+	constructor(canvas, magnif, rot) {
 		if (!magnif) {
 			magnif = 100;
 		}
 		// FEM
 		this.canvas = canvas;
+		this.rot = rot;
 		this.nodes = [];
 		this.nvn = -1;
 		this.dictionary = [];
@@ -340,6 +341,10 @@ class FEMViewer {
 		}
 	}
 
+	rotateModel() {
+		this.model.rotation.z += 0.005;
+	}
+
 	render(time) {
 		if (typeof time == "number") {
 			time = time || 0;
@@ -361,8 +366,12 @@ class FEMViewer {
 		// console.log(this.mult);
 
 		// Specific part of shit
-		if (this.animate) {
-			this.updateMeshCoords();
+		if (this.rot) {
+			this.rotateModel();
+		} else {
+			if (this.animate) {
+				this.updateMeshCoords();
+			}
 		}
 		if (this.resizeRendererToDisplaySize()) {
 			const canvas = this.renderer.domElement;
