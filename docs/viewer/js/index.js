@@ -21,7 +21,11 @@ if (queryString != "") {
 		rot = true;
 	}
 }
-let path = path_str;
+
+let path = `./resources/${path_str}.json`;
+if (path_str.startsWith("https://")) {
+	path = path_str;
+}
 
 const canvas = document.getElementById("model-view");
 const nodoTexto = document.getElementById("textNodo");
