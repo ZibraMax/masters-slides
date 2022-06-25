@@ -444,7 +444,7 @@ class FEMViewer {
 		this.mesh = new THREE.Mesh(this.mergedGeometry, this.material);
 		this.model.add(this.mesh);
 
-		new AxisGridHelper(this.scene, 0);
+		// new AxisGridHelper(this.scene, 0);
 
 		this.scene.add(this.model);
 		this.renderer.render(this.scene, this.camera);
