@@ -62,11 +62,15 @@ class FEMViewer {
 		this.dictionary = [];
 		this.types = [];
 		this.solutions = [];
+		this.solutions_info = [];
 		this.U = [];
 		this.step = 0;
 		this.max_disp = 0.0;
 		this.size = 0.0;
 		this.elements = [];
+		this.info = "";
+		this.infoDetail = "";
+
 		this.calculateStress = false;
 		this.C = Array(6).fill(Array(6).fill(0.0));
 		// THREE JS
@@ -136,6 +140,7 @@ class FEMViewer {
 		this.nodes = [];
 		this.dictionary = [];
 		this.solutions = [];
+		this.solutions_info = [];
 		this.step = 6;
 		this.U = undefined;
 		this.elements = [];
@@ -172,6 +177,10 @@ class FEMViewer {
 
 		// GUI
 		this.gui.add(this, "rot").name("Rotation").listen();
+		this.gui
+			.add(this, "draw_lines")
+			.onChange(this.updateLines.bind(this))
+			.name("Draw lines");
 
 		// ESTO ES SOLO PARA DESPLAZAMIENTOS ESPECIFICAMENTE
 
@@ -444,7 +453,7 @@ class FEMViewer {
 		this.mesh = new THREE.Mesh(this.mergedGeometry, this.material);
 		this.model.add(this.mesh);
 
-		// new AxisGridHelper(this.scene, 0);
+		new AxisGridHelper(this.scene, 0);
 
 		this.scene.add(this.model);
 		this.renderer.render(this.scene, this.camera);
@@ -478,14 +487,52 @@ class FEMViewer {
 		}
 		this.dictionary.push(...jsondata["dictionary"]);
 		this.types.push(...jsondata["types"]);
-		if (
-			jsondata["disp_field"] == undefined ||
-			jsondata["disp_field"].length == 0
-		) {
-			this.solutions = [Array(this.nodes.length * this.nvn).fill(0.0)];
+		if (jsondata["solutions"] == undefined) {
+			if (
+				jsondata["disp_field"] == undefined ||
+				jsondata["disp_field"].length == 0
+			) {
+				this.solutions = [
+					Array(this.nodes.length * this.nvn).fill(0.0),
+				];
+				this.solutions_info = [{ info: "Not solved" }];
+			}
 		} else {
-			this.solutions.push(...jsondata["disp_field"]);
+			if (jsondata["disp_field"] == undefined) {
+				for (let i = 0; i < jsondata["solutions"].length; i++) {
+					let solution = jsondata["solutions"][i];
+
+					this.solutions.push(solution["U"]);
+					this.solutions_info.push({ ...solution["info"], index: i });
+				}
+			} else {
+				this.solutions.push(...jsondata["disp_field"]);
+				this.solutions_info = [];
+				for (let i = 0; i < this.solutions.length; i++) {
+					this.solutions_info.push({
+						info: "Not info",
+						index: i,
+					});
+				}
+			}
 		}
+		const solutions_info_str = [];
+		for (let i = 0; i < this.solutions_info.length; i++) {
+			solutions_info_str.push(i);
+		}
+		this.gui
+			.add(this, "step", solutions_info_str)
+			.onChange(this.updateSolution.bind(this))
+			.listen()
+			.name("Solution");
+		this.gui
+			.add(this, "info", Object.keys(this.solutions_info[this.step]))
+			.listen()
+			.onChange(this.updateSolutionInfo.bind(this));
+		this.gui.add(this, "infoDetail", this.infoDetail).listen();
+		this.info = Object.keys(this.solutions_info[this.step])[0];
+		this.infoDetail = this.solutions_info[this.step][this.info];
+
 		for (let s = 0; s < this.solutions.length; s++) {
 			for (let i = 0; i < this.solutions[s].length; i++) {
 				this.solutions[s][i] *= norm;
@@ -513,6 +560,9 @@ class FEMViewer {
 		this.size =
 			Math.max(...this.nodes.flat()) - Math.min(...this.nodes.flat());
 	}
+	updateSolutionInfo() {
+		this.infoDetail = this.solutions_info[this.step][this.info];
+	}
 
 	updateU() {
 		this.U = this.solutions[this.step];
@@ -527,13 +577,16 @@ class FEMViewer {
 
 	nextSolution() {
 		this.step += 1 * (this.step < this.solutions.length - 1);
+		this.updateSolution();
+	}
+	updateSolution() {
 		this.updateU();
 		this.updateMeshCoords();
+		this.updateSolutionInfo();
 	}
 	prevSolution() {
 		this.step -= 1 * (this.step > 0);
-		this.updateU();
-		this.updateMeshCoords();
+		this.updateSolution();
 	}
 
 	createElements() {
