@@ -511,6 +511,7 @@ class FEMViewer {
 				this.solutions_info.push({ ...solution["info"], index: i });
 			}
 		}
+		console.log(this.solutions_info);
 		const solutions_info_str = [];
 		for (let i = 0; i < this.solutions_info.length; i++) {
 			solutions_info_str.push(i);
