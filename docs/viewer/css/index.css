@@ -84,9 +84,12 @@ body {
 	-ms-word-break: normal;
 	word-break: normal;
 }
-.closed {
+/* .closed {
 	opacity: 0;
 }
 .open {
 	opacity: 1;
+} */
+.disabled {
+	opacity: 1 !important;
 }

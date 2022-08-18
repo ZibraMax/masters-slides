@@ -487,24 +487,12 @@ class FEMViewer {
 		}
 		this.dictionary.push(...jsondata["dictionary"]);
 		this.types.push(...jsondata["types"]);
-		if (jsondata["solutions"] == undefined) {
-			if (
-				jsondata["disp_field"] == undefined ||
-				jsondata["disp_field"].length == 0
-			) {
+		if (!jsondata["solutions"]) {
+			if (!jsondata["disp_field"] || jsondata["disp_field"].length == 0) {
 				this.solutions = [
 					Array(this.nodes.length * this.nvn).fill(0.0),
 				];
 				this.solutions_info = [{ info: "Not solved" }];
-			}
-		} else {
-			if (jsondata["disp_field"] == undefined) {
-				for (let i = 0; i < jsondata["solutions"].length; i++) {
-					let solution = jsondata["solutions"][i];
-
-					this.solutions.push(solution["U"]);
-					this.solutions_info.push({ ...solution["info"], index: i });
-				}
 			} else {
 				this.solutions.push(...jsondata["disp_field"]);
 				this.solutions_info = [];
@@ -514,6 +502,13 @@ class FEMViewer {
 						index: i,
 					});
 				}
+			}
+		} else {
+			for (let i = 0; i < jsondata["solutions"].length; i++) {
+				let solution = jsondata["solutions"][i];
+
+				this.solutions.push(solution["U"]);
+				this.solutions_info.push({ ...solution["info"], index: i });
 			}
 		}
 		const solutions_info_str = [];
@@ -529,7 +524,7 @@ class FEMViewer {
 			.add(this, "info", Object.keys(this.solutions_info[this.step]))
 			.listen()
 			.onChange(this.updateSolutionInfo.bind(this));
-		this.gui.add(this, "infoDetail", this.infoDetail).listen();
+		this.gui.add(this, "infoDetail", this.infoDetail).listen().disable();
 		this.info = Object.keys(this.solutions_info[this.step])[0];
 		this.infoDetail = this.solutions_info[this.step][this.info];
 
