@@ -16,6 +16,12 @@
 		<title>results-viewer</title>
 		<link rel="stylesheet" href="./css/index.css" />
 		<link rel="stylesheet" href="./css/lilgui.light.css" />
+		<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css"
+			type="text/css"
+		/>
 	</head>
 	<body>
 		<div class="box">
@@ -23,5 +29,17 @@
 		</div>
 		<script src="./js/index.js" type="module"></script>
 		<script src="./js/build/math.js"></script>
+		<div id="previews" class="dropzone-previews"></div>
+
+		<button id="clickable">Click me to select files</button>
+
+		<script>
+			new Dropzone(document.body, {
+				// Make the whole body a dropzone
+				url: "/upload/url", // Set the url
+				previewsContainer: "#previews", // Define the container to display the previews
+				clickable: "#clickable", // Define the element that should be used as click trigger to select files.
+			});
+		</script>
 	</body>
 </html>

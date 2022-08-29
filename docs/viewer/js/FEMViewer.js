@@ -96,6 +96,7 @@ class FEMViewer {
 		this.secondVariable = 0;
 		this.dinamycColors = false;
 		this.lut = new Lut();
+		this.filename = "";
 
 		this.gui = new GUI({ title: "Settings" });
 		this.gui.close();
@@ -111,6 +112,7 @@ class FEMViewer {
 
 	async loadJSON(json_path) {
 		this.json_path = json_path;
+		this.filename = json_path;
 		const response = await fetch(this.json_path);
 		const jsondata = await response.json();
 		this.parseJSON(jsondata);
@@ -176,6 +178,11 @@ class FEMViewer {
 		this.scene.add(this.light2);
 
 		// GUI
+		this.gui
+			.add(this, "filename")
+			.name("Filename")
+			.listen()
+			.onChange(this.reload.bind(this));
 		this.gui.add(this, "rot").name("Rotation").listen();
 		this.gui
 			.add(this, "draw_lines")
@@ -201,6 +208,11 @@ class FEMViewer {
 			.onChange(() => {
 				this.updateMeshCoords();
 			});
+	}
+	async reload() {
+		this.reset();
+		await this.loadJSON(this.filename);
+		this.init();
 	}
 	updateColorVariable() {
 		for (const e of this.elements) {
