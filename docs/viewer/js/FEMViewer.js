@@ -104,6 +104,9 @@ class FEMViewer {
 		//248 / 360, 184 / 360
 		this.second_color = [255 / 255, 51 / 255, 51 / 255];
 		this.settings();
+		this.modalManager = () => {
+			activateModal();
+		};
 	}
 	defineElasticityTensor(C) {
 		this.calculateStress = true;
@@ -208,6 +211,7 @@ class FEMViewer {
 			.onChange(() => {
 				this.updateMeshCoords();
 			});
+		this.gui.add(this, "modalManager");
 	}
 	async reload() {
 		this.reset();

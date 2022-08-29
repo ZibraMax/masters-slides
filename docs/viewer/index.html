@@ -24,22 +24,33 @@
 		/>
 	</head>
 	<body>
+		<div id="myModal" class="modal">
+			<!-- Modal content -->
+			<div class="modal-content">
+				<span class="close">&times;</span>
+				<input type="file" name="file" />
+			</div>
+		</div>
 		<div class="box">
 			<canvas class="box side-pane" id="model-view"></canvas>
 		</div>
 		<script src="./js/index.js" type="module"></script>
 		<script src="./js/build/math.js"></script>
-		<div id="previews" class="dropzone-previews"></div>
-
-		<button id="clickable">Click me to select files</button>
 
 		<script>
-			new Dropzone(document.body, {
-				// Make the whole body a dropzone
-				url: "/upload/url", // Set the url
-				previewsContainer: "#previews", // Define the container to display the previews
-				clickable: "#clickable", // Define the element that should be used as click trigger to select files.
-			});
+			var modal = document.getElementById("myModal");
+			var span = document.getElementsByClassName("close")[0];
+			function activateModal() {
+				modal.style.display = "block";
+			}
+			span.onclick = function () {
+				modal.style.display = "none";
+			};
+			window.onclick = function (event) {
+				if (event.target == modal) {
+					modal.style.display = "none";
+				}
+			};
 		</script>
 	</body>
 </html>
