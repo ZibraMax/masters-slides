@@ -1,6 +1,7 @@
 import { FEMViewer } from "./FEMViewer.js";
 let magnif = 600;
 let rot = false;
+let mode = 6;
 
 let path_str =
 	"https://raw.githubusercontent.com/ZibraMax/masters-slides/main/results/SiCube_l3_0_0_500_L_25_884.json";
@@ -12,6 +13,7 @@ if (queryString != "") {
 	let funcion_param = parametros.get("mesh");
 	let magnif_param = parametros.get("magnif");
 	let rot_param = parametros.get("rot");
+	let mode_param = parametros.get("mode");
 	vis_param = parametros.get("menu");
 	if (funcion_param) {
 		path_str = funcion_param;
@@ -22,6 +24,9 @@ if (queryString != "") {
 	if (rot_param) {
 		rot = true;
 	}
+	if (mode_param) {
+		mode = parseFloat(mode_param);
+	}
 }
 
 let path = `./resources/${path_str}.json`;
@@ -30,12 +35,11 @@ if (path_str.startsWith("https://")) {
 }
 
 const canvas = document.getElementById("model-view");
-const nodoTexto = document.getElementById("textNodo");
 
 const O = new FEMViewer(canvas, magnif, rot);
 await O.loadJSON(path);
 O.init();
-O.setStep(6);
+O.setStep(mode);
 document.addEventListener("visibilitychange", (e) =>
 	O.handleVisibilityChange(e)
 );

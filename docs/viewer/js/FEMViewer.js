@@ -71,8 +71,6 @@ class FEMViewer {
 		this.info = "";
 		this.infoDetail = "";
 
-		this.calculateStress = false;
-		this.C = Array(6).fill(Array(6).fill(0.0));
 		// THREE JS
 		this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 		this.renderer.autoClear = false;
@@ -90,21 +88,16 @@ class FEMViewer {
 		this.side = 1.0;
 		this.max_disp = 0.0;
 		this.draw_lines = true;
+		this.colormap = "rainbow";
 
-		this.mode = "MAX";
-		this.colorMode = "DISP";
-		this.secondVariable = 0;
-		this.dinamycColors = false;
-		this.lut = new Lut();
+		this.lut = new Lut(this.colormap);
 		this.filename = "";
 
 		this.gui = new GUI({ title: "Settings" });
 		this.gui.close();
-		this.first_color = [78 / 255, 51 / 255, 255 / 255];
-		//248 / 360, 184 / 360
-		this.second_color = [255 / 255, 51 / 255, 51 / 255];
 		this.settings();
 		this.loaded = false;
+		this.colorOptions = "nocolor";
 	}
 	modalManager() {
 		activateModal();
@@ -182,6 +175,17 @@ class FEMViewer {
 		this.camera.add(this.light);
 		this.scene.add(this.light2);
 
+		this.orthoCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 2);
+		this.orthoCamera.position.set(0.5, 0, 1);
+		this.uiScene = new THREE.Scene();
+		this.sprite = new THREE.Sprite(
+			new THREE.SpriteMaterial({
+				map: new THREE.CanvasTexture(this.lut.createCanvas()),
+			})
+		);
+		this.sprite.scale.x = 0.125;
+		this.uiScene.add(this.sprite);
+
 		// GUI
 		this.gui
 			.add(this, "filename")
@@ -214,6 +218,25 @@ class FEMViewer {
 			.onChange(() => {
 				this.updateMeshCoords();
 			});
+
+		this.gui
+			.add(this, "colorOptions", {
+				"No color": "nocolor",
+				"Displacements magnitude": "dispmag",
+				"Epsilon x": "epsx",
+			})
+			.name("Show color")
+			.listen()
+			.onChange(this.updateColorVariable.bind(this));
+		this.gui
+			.add(this, "colorMap", [
+				"rainbow",
+				"cooltowarm",
+				"blackbody",
+				"grayscale",
+			])
+			.listen()
+			.onChange(this.updateColorVariable.bind(this));
 	}
 	async reload() {
 		this.reset();
@@ -221,32 +244,31 @@ class FEMViewer {
 		this.init();
 	}
 	updateColorVariable() {
+		this.lut.setColorMap(this.colorMap);
+		const map = this.sprite.material.map;
+		this.lut.updateCanvas(map.image);
+		map.needsUpdate = true;
+		const co = this.colorOptions;
+		if (co != "nocolor") {
+			this.colors = true;
+		} else {
+			this.colors = false;
+		}
 		for (const e of this.elements) {
-			e.setMaxDispNode(this.colorMode, this.secondVariable);
+			e.setMaxDispNode(this.colorOptions);
 		}
 
-		let max_disp = 0.0;
+		let max_disp = -9999999999999;
 		let min_disp = 9999999999999;
-		if (this.colorMode == "DISP") {
-			const variable = this.U.flat();
+		for (const e of this.elements) {
+			const variable = e.colors;
 			max_disp = Math.max(max_disp, ...variable);
 			min_disp = Math.min(min_disp, ...variable);
-		} else if (this.colorMode == "STRESS") {
-			for (const e of this.elements) {
-				const variable = e.colors;
-				max_disp = Math.max(max_disp, ...variable);
-				min_disp = Math.min(min_disp, ...variable);
-			}
-		} else if (this.colorMode == "STRAIN") {
-			for (const e of this.elements) {
-				const variable = e.colors;
-				max_disp = Math.max(max_disp, ...variable);
-				min_disp = Math.min(min_disp, ...variable);
-			}
 		}
-		this.max_disp = this.max_disp;
+
 		this.lut.setMax(max_disp);
 		this.lut.setMin(min_disp);
+		this.updateMaterial();
 	}
 	updateCamera() {
 		this.camera.updateProjectionMatrix();
@@ -325,17 +347,6 @@ class FEMViewer {
 				);
 			}
 			if (this.colors) {
-				let max_disp_nodes = e.max_disp_nodes;
-				let amount = max_disp_nodes / this.max_disp;
-				if (this.colorMode == "DISP") {
-					amount *= !this.dinamycColors ? 1 : Math.abs(this.mult);
-				} else {
-					amount *= !this.dinamycColors ? 1 : this.mult;
-				}
-				if (this.colorMode != "DISP") {
-					amount += 1.0;
-					amount /= 2;
-				}
 				const colors = this.bufferGeometries[i].attributes.color;
 				for (let j = 0; j < e.order.length; j++) {
 					let disp = e.colors[j];
@@ -402,6 +413,9 @@ class FEMViewer {
 			this.camera.updateProjectionMatrix();
 		}
 		this.renderer.render(this.scene, this.camera);
+		if (this.colors) {
+			this.renderer.render(this.uiScene, this.orthoCamera);
+		}
 	}
 
 	zoomExtents() {
@@ -471,7 +485,7 @@ class FEMViewer {
 		this.mesh = new THREE.Mesh(this.mergedGeometry, this.material);
 		this.model.add(this.mesh);
 
-		new AxisGridHelper(this.scene, 0);
+		// new AxisGridHelper(this.scene, 0);
 
 		this.scene.add(this.model);
 		this.renderer.render(this.scene, this.camera);
@@ -594,10 +608,7 @@ class FEMViewer {
 	updateU() {
 		this.U = this.solutions[this.step];
 		for (const e of this.elements) {
-			e.setUe(this.U, this.calculateStress);
-			if (this.calculateStress) {
-				e.postProcess(this.C, this.calculateStress);
-			}
+			e.setUe(this.U, true);
 		}
 		this.updateColorVariable();
 	}
@@ -674,15 +685,13 @@ class FEMViewer {
 		// );
 		// const raycaster = new THREE.Raycaster();
 		// raycaster.setFromCamera(mouse3D, this.camera);
-		// const intersects = raycaster.intersectObjects(
-		// 	this.invisibleModel.children
-		// );
-		// // for (const e of intersects) {
-		// // 	const index = e.object.userData.elementId;
-		// // 	this.elements[index].colors = this.elements[index].colors.map(
-		// // 		(x) => 0
-		// // 	);
-		// // }
+		// const intersects = raycaster.intersectObjects(this.model.children);
+		// for (const e of intersects) {
+		// 	const index = e.object.userData.elementId;
+		// 	this.elements[index].colors = this.elements[index].colors.map(
+		// 		(x) => 0
+		// 	);
+		// }
 		// if (intersects.length > 0) {
 		// 	const keleven = intersects[0].object.userData.elementId;
 		// 	console.log(keleven);

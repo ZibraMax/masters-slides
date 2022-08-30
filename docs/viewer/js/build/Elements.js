@@ -10,7 +10,7 @@ class Element {
 		this.gdls = gdls;
 		this.Ue = [];
 	}
-	setUe(U, svs = false) {
+	setUe(U, svs = true) {
 		this.Ue = [];
 		for (const v of this.gdls) {
 			const u = [];
@@ -82,12 +82,12 @@ class Element {
 	}
 	J(_z) {
 		const dpsis = math.transpose(this.dpsi(_z));
-		const j = math.multiply(dpsis, this.coords);
+		const j = math.multiply(dpsis, this.coords_o);
 		return [j, dpsis];
 	}
 	T(_z) {
 		let p = this.psi(_z);
-		return [math.multiply(p, this.coords), p];
+		return [math.multiply(p, this.coords_o), p];
 	}
 	inverseMapping(x0) {
 		let zi = [0.15, 0.15, 0.15];
@@ -111,18 +111,26 @@ class Element {
 			const dpx = math.multiply(_J, dpz);
 			this.dus.push(math.multiply(this.Ue, math.transpose(dpx)));
 		}
+		this.calculateStrain();
 	}
-	setMaxDispNode(colorMode, secondVariable) {
+	setMaxDispNode(colorMode) {
 		this.colors = Array(this.order.length).fill(0.0);
 		let variable = math.transpose(this.Ue);
-		if (colorMode == "STRESS") {
-			variable = this.sigmas;
-		} else if (colorMode == "STRAIN") {
+		if (colorMode == "epsx") {
 			variable = this.epsilons;
-		}
-		for (let i = 0; i < this.order.length; i++) {
-			const gdl = this.order[i];
-			this.colors[i] = variable[gdl][secondVariable];
+			for (let i = 0; i < this.order.length; i++) {
+				const gdl = this.order[i];
+				this.colors[i] = variable[gdl][0];
+			}
+		} else {
+			for (let i = 0; i < this.order.length; i++) {
+				const gdl = this.order[i];
+				let color = 0.0;
+				for (const v of variable[gdl]) {
+					color += v ** 2;
+				}
+				this.colors[i] = color ** 0.5;
+			}
 		}
 	}
 }
@@ -132,6 +140,29 @@ class Element3D extends Element {
 	}
 	isInside(x) {
 		return false;
+	}
+	calculateStrain() {
+		this.epsilons = [];
+		for (const du of this.dus) {
+			if (du.length == 3) {
+				const exx = du[0][0];
+				const eyy = du[1][1];
+				const ezz = du[2][2];
+
+				const exy = du[0][1] + du[1][0];
+				const exz = du[0][2] + du[2][0];
+				const eyz = du[1][2] + du[2][1];
+				const epsilon = [exx, eyy, ezz, exz, eyz, exy];
+				this.epsilons.push(epsilon);
+			} else {
+				const exx = du[0][0];
+				const eyy = du[1][1];
+
+				const exy = du[0][1] + du[1][0];
+				const epsilon = [exx, eyy, exy];
+				this.epsilons.push(epsilon);
+			}
+		}
 	}
 	postProcess(C, calculateStress) {
 		this.sigmas = [];
@@ -159,6 +190,7 @@ class Brick extends Element3D {
 	line_order;
 	constructor(coords, gdls) {
 		super(coords, gdls);
+		this.coords_o = coords;
 		this.domain = [
 			[-1, -1, -1],
 			[1, -1, -1],
@@ -271,6 +303,7 @@ class Tetrahedral extends Element3D {
 	line_order;
 	constructor(coords, gdls) {
 		super(coords, gdls);
+		this.coords_o = coords;
 		this.domain = [
 			[0.0, 0.0, 0.0],
 			[1.0, 0.0, 0.0],
@@ -368,7 +401,18 @@ class Triangular extends Element3D {
 	line_order;
 	constructor(coords, gdls, tama) {
 		super(coords, gdls);
+		const c = [];
+		for (let i = 0; i < coords.length; i++) {
+			const x = coords[i][0];
+			const y = coords[i][1];
+			c.push([x, y]);
+		}
 		this.geometry = new THREE.BoxGeometry(1);
+		this.domain = [
+			[0, 0],
+			[1, 0],
+			[0, 1],
+		];
 		this.order = [
 			2, 2, 1, 1, 2, 2, 0, 0, 2, 2, 2, 2, 0, 1, 0, 1, 2, 2, 0, 1, 2, 2, 1,
 			0,
@@ -424,10 +468,23 @@ class Quadrilateral extends Element3D {
 	line_order;
 	constructor(coords, gdls, tama) {
 		super(coords, gdls);
+		const c = [];
+		for (let i = 0; i < coords.length; i++) {
+			const x = coords[i][0];
+			const y = coords[i][1];
+			c.push([x, y]);
+		}
+		this.coords_o = c;
 		this.geometry = new THREE.BoxGeometry(1);
 		this.order = [
 			2, 2, 1, 1, 3, 3, 0, 0, 3, 2, 3, 2, 0, 1, 0, 1, 3, 2, 0, 1, 2, 3, 1,
 			0,
+		];
+		this.domain = [
+			[0, 0],
+			[1, 0],
+			[1, 1],
+			[0, 1],
 		];
 		this.line_order = [0, 1, 2, 3, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3];
 		const h = tama / 20.0;
@@ -516,10 +573,40 @@ class Serendipity extends Quadrilateral {
 		super(coords, gdls, tama);
 	}
 	psi(z) {
-		return 0.0;
+		return [
+			0.25 * (1.0 - z[0]) * (1.0 - z[1]) * (-1.0 - z[0] - z[1]),
+			0.25 * (1.0 + z[0]) * (1.0 - z[1]) * (-1.0 + z[0] - z[1]),
+			0.25 * (1.0 + z[0]) * (1.0 + z[1]) * (-1.0 + z[0] + z[1]),
+			0.25 * (1.0 - z[0]) * (1.0 + z[1]) * (-1.0 - z[0] + z[1]),
+			0.5 * (1.0 - z[0] ** 2.0) * (1.0 - z[1]),
+			0.5 * (1.0 + z[0]) * (1.0 - z[1] ** 2.0),
+			0.5 * (1.0 - z[0] ** 2.0) * (1.0 + z[1]),
+			0.5 * (1.0 - z[0]) * (1.0 - z[1] ** 2.0),
+		];
 	}
 	dpsi(z) {
-		return 0.0;
+		return [
+			[
+				-0.25 * (z[1] - 1.0) * (2.0 * z[0] + z[1]),
+				-0.25 * (z[0] - 1.0) * (2.0 * z[1] + z[0]),
+			],
+			[
+				-0.25 * (z[1] - 1.0) * (2.0 * z[0] - z[1]),
+				0.25 * (z[0] + 1.0) * (2.0 * z[1] - z[0]),
+			],
+			[
+				0.25 * (z[1] + 1.0) * (2.0 * z[0] + z[1]),
+				0.25 * (z[0] + 1.0) * (2.0 * z[1] + z[0]),
+			],
+			[
+				0.25 * (z[1] + 1.0) * (2.0 * z[0] - z[1]),
+				-0.25 * (z[0] - 1.0) * (2.0 * z[1] - z[0]),
+			],
+			[(z[1] - 1.0) * z[0], 0.5 * (z[0] ** 2.0 - 1.0)],
+			[-0.5 * (z[1] ** 2.0 - 1.0), -z[1] * (z[0] + 1.0)],
+			[-(z[1] + 1.0) * z[0], -0.5 * (z[0] ** 2.0 - 1.0)],
+			[0.5 * (z[1] ** 2.0 - 1.0), z[1] * (z[0] - 1.0)],
+		];
 	}
 }
 
