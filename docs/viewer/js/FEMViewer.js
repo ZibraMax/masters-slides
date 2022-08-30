@@ -70,6 +70,7 @@ class FEMViewer {
 		this.elements = [];
 		this.info = "";
 		this.infoDetail = "";
+		this.ndim = -1;
 
 		// THREE JS
 		this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -95,9 +96,9 @@ class FEMViewer {
 
 		this.gui = new GUI({ title: "Settings" });
 		this.gui.close();
-		this.settings();
 		this.loaded = false;
 		this.colorOptions = "nocolor";
+		this.settings();
 	}
 	modalManager() {
 		activateModal();
@@ -141,7 +142,7 @@ class FEMViewer {
 		this.dictionary = [];
 		this.solutions = [];
 		this.solutions_info = [];
-		this.step = 6;
+		this.step = 0;
 		this.U = undefined;
 		this.elements = [];
 		this.types = [];
@@ -218,26 +219,6 @@ class FEMViewer {
 			.onChange(() => {
 				this.updateMeshCoords();
 			});
-
-		this.gui
-			.add(this, "colorOptions", {
-				"No color": "nocolor",
-				"Displacements magnitude": "dispmag",
-				"Epsilon x": "epsx",
-			})
-			.name("Show color")
-			.listen()
-			.onChange(this.updateColorVariable.bind(this));
-		this.gui
-			.add(this, "colorMap", [
-				"rainbow",
-				"cooltowarm",
-				"blackbody",
-				"grayscale",
-			])
-			.listen()
-			.name("Colormap")
-			.onChange(this.updateColorVariable.bind(this));
 	}
 	async reload() {
 		this.reset();
@@ -245,7 +226,7 @@ class FEMViewer {
 		this.init();
 	}
 	updateColorVariable() {
-		this.lut.setColorMap(this.colorMap);
+		this.lut.setColorMap(this.colormap);
 		const map = this.sprite.material.map;
 		this.lut.updateCanvas(map.image);
 		map.needsUpdate = true;
@@ -256,7 +237,7 @@ class FEMViewer {
 			this.colors = false;
 		}
 		for (const e of this.elements) {
-			e.setMaxDispNode(this.colorOptions);
+			e.setMaxDispNode(this.colorOptions, this.ndim);
 		}
 
 		let max_disp = -9999999999999;
@@ -276,6 +257,14 @@ class FEMViewer {
 	}
 	updateCamera() {
 		this.camera.updateProjectionMatrix();
+	}
+	async renderMath() {
+		function f() {
+			renderMathInElement(document.body, {
+				throwOnError: false,
+			});
+		}
+		setTimeout(f, 100);
 	}
 
 	updateMaterial() {
@@ -517,6 +506,7 @@ class FEMViewer {
 			}
 		}
 		this.nvn = jsondata["nvn"];
+		this.ndim = this.nodes[0].length;
 		for (let i = 0; i < this.nodes.length; i++) {
 			for (let j = this.nodes[i].length; j < 3; j++) {
 				this.nodes[i].push(0.0); //Coordinate completition
@@ -560,7 +550,44 @@ class FEMViewer {
 		if (this.loaded) {
 			this.guifolder.destroy();
 		}
+		let dict = {};
+		if (this.ndim == 3) {
+			dict = {
+				"\\(\\varepsilon_x\\)": "epsx",
+				"\\(\\varepsilon_y\\)": "epsy",
+				"\\(\\varepsilon_z\\)": "epsz",
+				"\\(\\varepsilon_{xy}\\)": "epsxy",
+				"\\(\\varepsilon_{xz}\\)": "epsxz",
+				"\\(\\varepsilon_{yz}\\)": "epsyz",
+			};
+		} else if (this.ndim == 2) {
+			dict = {
+				"\\(\\varepsilon_x\\)": "epsx",
+				"\\(\\varepsilon_y\\)": "epsy",
+				"\\(\\varepsilon_{xy}\\)": "epsxy",
+			};
+		}
 		this.guifolder = this.gui.addFolder("Solutions");
+		this.guifolder
+			.add(this, "colorOptions", {
+				"No color": "nocolor",
+				"\\(|U|\\)": "dispmag",
+				...dict,
+			})
+			.name("Show color")
+			.listen()
+			.onChange(this.updateColorVariable.bind(this))
+			.onFinishChange(this.renderMath.bind(this));
+		this.guifolder
+			.add(this, "colormap", [
+				"rainbow",
+				"cooltowarm",
+				"blackbody",
+				"grayscale",
+			])
+			.listen()
+			.name("Colormap")
+			.onChange(this.updateColorVariable.bind(this));
 		this.guifolder
 			.add(this, "step", solutions_info_str)
 			.onChange(this.updateSolution.bind(this))

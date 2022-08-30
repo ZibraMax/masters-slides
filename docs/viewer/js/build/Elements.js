@@ -30,9 +30,10 @@ class Element {
 			Ue.push(a);
 			Ue.push(a);
 		}
-
 		if (!mult) {
-			mult = 1.0;
+			if (mult != 0) {
+				mult = 1.0;
+			}
 		}
 
 		if (!parent_geometry) {
@@ -113,16 +114,10 @@ class Element {
 		}
 		this.calculateStrain();
 	}
-	setMaxDispNode(colorMode) {
+	setMaxDispNode(colorMode, ndim = 3) {
 		this.colors = Array(this.order.length).fill(0.0);
 		let variable = math.transpose(this.Ue);
-		if (colorMode == "epsx") {
-			variable = this.epsilons;
-			for (let i = 0; i < this.order.length; i++) {
-				const gdl = this.order[i];
-				this.colors[i] = variable[gdl][0];
-			}
-		} else {
+		if (colorMode == "dispmag") {
 			for (let i = 0; i < this.order.length; i++) {
 				const gdl = this.order[i];
 				let color = 0.0;
@@ -130,6 +125,29 @@ class Element {
 					color += v ** 2;
 				}
 				this.colors[i] = color ** 0.5;
+			}
+		} else {
+			let dict = {};
+			if (ndim == 3) {
+				dict = {
+					epsx: 0,
+					epsy: 1,
+					epsz: 2,
+					epsxy: 3,
+					epsxz: 4,
+					epsyz: 5,
+				};
+			} else if (ndim == 2) {
+				dict = {
+					epsx: 0,
+					epsy: 1,
+					epsxy: 2,
+				};
+			}
+			variable = this.epsilons;
+			for (let i = 0; i < this.order.length; i++) {
+				const gdl = this.order[i];
+				this.colors[i] = variable[gdl][dict[colorMode]];
 			}
 		}
 	}
@@ -407,6 +425,7 @@ class Triangular extends Element3D {
 			const y = coords[i][1];
 			c.push([x, y]);
 		}
+		this.coords_o = c;
 		this.geometry = new THREE.BoxGeometry(1);
 		this.domain = [
 			[0, 0],
@@ -456,10 +475,15 @@ class Triangular extends Element3D {
 		}
 	}
 	psi(_z) {
-		return 0.0;
+		return [1.0 - z[0] - z[1], z[0], z[1]];
 	}
 	dpsi(_z) {
-		return 0.0;
+		kernell = z[0] - z[0];
+		return [
+			[-1.0 * (1 + kernell), -1.0 * (1 + kernell)],
+			[1.0 * (1 + kernell), 0.0 * (1 + kernell)],
+			[0.0 * (1 + kernell), 1.0 * (1 + kernell)],
+		];
 	}
 }
 
@@ -525,10 +549,20 @@ class Quadrilateral extends Element3D {
 		}
 	}
 	psi(_z) {
-		return 0.0;
+		return [
+			0.25 * (1.0 - z[0]) * (1.0 - z[1]),
+			0.25 * (1.0 + z[0]) * (1.0 - z[1]),
+			0.25 * (1.0 + z[0]) * (1.0 + z[1]),
+			0.25 * (1.0 - z[0]) * (1.0 + z[1]),
+		];
 	}
 	dpsi(_z) {
-		return 0.0;
+		return [
+			[0.25 * (z[1] - 1.0), 0.25 * (z[0] - 1.0)],
+			[-0.25 * (z[1] - 1.0), -0.25 * (z[0] + 1.0)],
+			[0.25 * (z[1] + 1.0), 0.25 * (1.0 + z[0])],
+			[-0.25 * (1.0 + z[1]), 0.25 * (1.0 - z[0])],
+		];
 	}
 }
 
@@ -536,13 +570,51 @@ class TetrahedralO2 extends Tetrahedral {
 	constructor(coords, gdls) {
 		super(coords, gdls);
 	}
-	psi(z) {
-		return 0.0;
+	psi(_z) {
+		x = _z[0];
+		y = _z[1];
+		z = _z[2];
+		L1 = 1 - x - y - z;
+		L2 = x;
+		L3 = y;
+		L4 = z;
+		return [
+			L1 * (2 * L1 - 1),
+			L2 * (2 * L2 - 1),
+			L3 * (2 * L3 - 1),
+			L4 * (2 * L4 - 1),
+			4 * L1 * L2,
+			4 * L2 * L3,
+			4 * L3 * L1,
+			4 * L1 * L4,
+			4 * L2 * L4,
+			4 * L3 * L4,
+		];
 	}
-	dpsi(z) {
-		return 0.0;
+	dpsi(_z) {
+		x = _z[0];
+		y = _z[1];
+		z = _z[2];
+
+		return [
+			[
+				4 * x + 4 * y + 4 * z - 3,
+				4 * x + 4 * y + 4 * z - 3,
+				4 * x + 4 * y + 4 * z - 3,
+			],
+			[4 * x - 1, 0, 0],
+			[0, 4 * y - 1, 0],
+			[0, 0, 4 * z - 1],
+			[-8 * x - 4 * y - 4 * z + 4, -4 * x, -4 * x],
+			[4 * y, 4 * x, 0],
+			[-4 * y, -4 * x - 8 * y - 4 * z + 4, -4 * y],
+			[-4 * z, -4 * z, -4 * x - 4 * y - 8 * z + 4],
+			[4 * z, 0, 4 * x],
+			[0, 4 * z, 4 * y],
+		];
 	}
 }
+// TODO Agregar estos elementos. Las funciones son un asco
 
 class BrickO2 extends Brick {
 	constructor(coords, gdls) {
@@ -561,10 +633,24 @@ class TriangularO2 extends Triangular {
 		super(coords, gdls, tama);
 	}
 	psi(z) {
-		return 0.0;
+		return [
+			2.0 * (z[0] + z[1] - 1.0) * (z[0] + z[1] - 0.5),
+			2.0 * z[0] * (z[0] - 0.5),
+			2.0 * z[1] * (z[1] - 0.5),
+			-4.0 * (z[0] + z[1] - 1.0) * z[0],
+			4.0 * z[0] * z[1],
+			-4.0 * z[1] * (z[0] + z[1] - 1.0),
+		];
 	}
 	dpsi(z) {
-		return 0.0;
+		return [
+			[4.0 * z[0] + 4.0 * z[1] - 3.0, 4.0 * z[1] + 4.0 * z[0] - 3.0],
+			[4.0 * z[0] - 1.0, 0 * z[0]],
+			[0 * z[0], 4.0 * z[1] - 1.0],
+			[-8.0 * z[0] - 4.0 * (z[1] - 1.0), -4.0 * z[0]],
+			[4.0 * z[1], 4.0 * z[0]],
+			[-4.0 * z[1], -8.0 * z[1] - 4.0 * z[0] + 4.0],
+		];
 	}
 }
 
