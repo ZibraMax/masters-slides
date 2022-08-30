@@ -236,6 +236,7 @@ class FEMViewer {
 				"grayscale",
 			])
 			.listen()
+			.name("Colormap")
 			.onChange(this.updateColorVariable.bind(this));
 	}
 	async reload() {
