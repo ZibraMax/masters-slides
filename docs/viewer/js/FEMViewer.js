@@ -269,6 +269,9 @@ class FEMViewer {
 		this.lut.setMax(max_disp);
 		this.lut.setMin(min_disp);
 		this.updateMaterial();
+		try {
+			this.updateMeshCoords();
+		} catch (error) {}
 	}
 	updateCamera() {
 		this.camera.updateProjectionMatrix();
