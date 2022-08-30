@@ -5,12 +5,14 @@ let rot = false;
 let path_str =
 	"https://raw.githubusercontent.com/ZibraMax/masters-slides/main/results/SiCube_l3_0_0_500_L_25_884.json";
 let queryString = window.location.search;
+let vis_param = 0;
 if (queryString != "") {
 	queryString = queryString.split("?")[1];
 	let parametros = new URLSearchParams(queryString);
 	let funcion_param = parametros.get("mesh");
 	let magnif_param = parametros.get("magnif");
 	let rot_param = parametros.get("rot");
+	vis_param = parametros.get("menu");
 	if (funcion_param) {
 		path_str = funcion_param;
 	}
@@ -37,7 +39,10 @@ O.setStep(6);
 document.addEventListener("visibilitychange", (e) =>
 	O.handleVisibilityChange(e)
 );
-
+const gui = document.querySelector(".root");
+if (!vis_param) {
+	gui.classList.add("alwaysOpen");
+}
 const file_input = document.getElementById("json-file-input");
 
 function openFiles(evt) {

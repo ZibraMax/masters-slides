@@ -84,12 +84,15 @@ body {
 	-ms-word-break: normal;
 	word-break: normal;
 }
-/* .closed {
-	opacity: 0;
+.closed {
+	opacity: 0 !important;
+}
+.alwaysOpen {
+	opacity: 1 !important;
 }
 .open {
-	opacity: 1;
-} */
+	opacity: 1 !important;
+}
 .disabled {
 	opacity: 1 !important;
 }
