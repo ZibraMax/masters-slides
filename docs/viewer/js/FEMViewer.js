@@ -104,9 +104,11 @@ class FEMViewer {
 		//248 / 360, 184 / 360
 		this.second_color = [255 / 255, 51 / 255, 51 / 255];
 		this.settings();
-		this.modalManager = () => {
-			activateModal();
-		};
+		this.loaded = false;
+	}
+	modalManager() {
+		activateModal();
+		this.gui.close();
 	}
 	defineElasticityTensor(C) {
 		this.calculateStress = true;
@@ -186,6 +188,7 @@ class FEMViewer {
 			.name("Filename")
 			.listen()
 			.onChange(this.reload.bind(this));
+		this.gui.add(this, "modalManager").name("Load JSON File");
 		this.gui.add(this, "rot").name("Rotation").listen();
 		this.gui
 			.add(this, "draw_lines")
@@ -211,7 +214,6 @@ class FEMViewer {
 			.onChange(() => {
 				this.updateMeshCoords();
 			});
-		this.gui.add(this, "modalManager");
 	}
 	async reload() {
 		this.reset();
@@ -487,6 +489,7 @@ class FEMViewer {
 	parseJSON(jsondata) {
 		const norm = 1.0 / Math.max(...jsondata["nodes"].flat());
 		// console.log(norm);
+		this.nodes = [];
 		this.nodes.push(...jsondata["nodes"]);
 
 		for (let i = 0; i < this.nodes.length; i++) {
@@ -501,6 +504,11 @@ class FEMViewer {
 				this.nodes[i].push(0.0); //Coordinate completition
 			}
 		}
+		this.dictionary = [];
+		this.types = [];
+		this.solutions_info = [];
+		this.solutions = [];
+
 		this.dictionary.push(...jsondata["dictionary"]);
 		this.types.push(...jsondata["types"]);
 		if (!jsondata["solutions"]) {
@@ -527,21 +535,28 @@ class FEMViewer {
 				this.solutions_info.push({ ...solution["info"], index: i });
 			}
 		}
-		console.log(this.solutions_info);
 		const solutions_info_str = [];
 		for (let i = 0; i < this.solutions_info.length; i++) {
 			solutions_info_str.push(i);
 		}
-		this.gui
+		if (this.loaded) {
+			this.guifolder.destroy();
+		}
+		this.guifolder = this.gui.addFolder("Solutions");
+		this.guifolder
 			.add(this, "step", solutions_info_str)
 			.onChange(this.updateSolution.bind(this))
 			.listen()
 			.name("Solution");
-		this.gui
+		this.guifolder
 			.add(this, "info", Object.keys(this.solutions_info[this.step]))
 			.listen()
 			.onChange(this.updateSolutionInfo.bind(this));
-		this.gui.add(this, "infoDetail", this.infoDetail).listen().disable();
+		this.guifolder
+			.add(this, "infoDetail", this.infoDetail)
+			.listen()
+			.disable();
+		this.loaded = true;
 		this.info = Object.keys(this.solutions_info[this.step])[0];
 		this.infoDetail = this.solutions_info[this.step][this.info];
 

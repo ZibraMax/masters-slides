@@ -37,3 +37,29 @@ O.setStep(6);
 document.addEventListener("visibilitychange", (e) =>
 	O.handleVisibilityChange(e)
 );
+
+const file_input = document.getElementById("json-file-input");
+
+function openFiles(evt) {
+	var files = evt.target.files;
+
+	for (var i = 0, len = files.length; i < len; i++) {
+		var file = files[i];
+
+		var reader = new FileReader();
+
+		reader.onload = (function (f) {
+			return function (e) {
+				const json_txt = e.target.result;
+				const jsondata = JSON.parse(json_txt);
+				O.reset();
+				O.step = 0;
+				O.parseJSON(jsondata);
+				O.init();
+			};
+		})(file);
+
+		reader.readAsText(file);
+	}
+}
+file_input.addEventListener("change", openFiles);

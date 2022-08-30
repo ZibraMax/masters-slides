@@ -28,14 +28,12 @@
 			<!-- Modal content -->
 			<div class="modal-content">
 				<span class="close">&times;</span>
-				<input type="file" name="file" />
+				<input type="file" name="file" id="json-file-input" />
 			</div>
 		</div>
 		<div class="box">
 			<canvas class="box side-pane" id="model-view"></canvas>
 		</div>
-		<script src="./js/index.js" type="module"></script>
-		<script src="./js/build/math.js"></script>
 
 		<script>
 			var modal = document.getElementById("myModal");
@@ -52,5 +50,7 @@
 				}
 			};
 		</script>
+		<script src="./js/index.js" type="module"></script>
+		<script src="./js/build/math.js"></script>
 	</body>
 </html>
