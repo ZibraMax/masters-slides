@@ -69,7 +69,7 @@ function openFiles(evt) {
 				O.reset();
 				O.step = 0;
 				O.parseJSON(jsondata);
-				O.init();
+				O.init(false);
 			};
 		})(file);
 

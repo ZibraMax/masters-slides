@@ -230,7 +230,7 @@ class FEMViewer {
 	async reload() {
 		this.reset();
 		await this.loadJSON(this.filename);
-		this.init();
+		this.init(false);
 	}
 	updateColorVariable() {
 		this.lut.setColorMap(this.colormap);
@@ -463,8 +463,8 @@ class FEMViewer {
 		}
 	}
 
-	init() {
-		this.animate = true;
+	init(animate = true) {
+		this.animate = animate;
 		this.createElements();
 		this.createLines();
 		this.updateU();
