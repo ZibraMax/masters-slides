@@ -22,7 +22,7 @@ class Element {
 
 		if (svs) this.giveSecondVariableSolution();
 	}
-	setGeometryCoords(Ue, mult, parent_geometry, line_geometry) {
+	setGeometryCoords(Ue, mult, norm, parent_geometry, line_geometry) {
 		if (!Ue) {
 			Ue = [];
 			const a = Array(this.coords.length).fill(0.0);
@@ -45,15 +45,21 @@ class Element {
 			const verticei = this.coords[node];
 			parent_geometry.attributes.position.setX(
 				i,
-				verticei[0] + this.modifier[i][0] + Ue[0][node] * mult
+				verticei[0] * norm +
+					this.modifier[i][0] +
+					Ue[0][node] * mult * norm
 			);
 			parent_geometry.attributes.position.setY(
 				i,
-				verticei[1] + this.modifier[i][1] + Ue[1][node] * mult
+				verticei[1] * norm +
+					this.modifier[i][1] +
+					Ue[1][node] * mult * norm
 			);
 			parent_geometry.attributes.position.setZ(
 				i,
-				verticei[2] + this.modifier[i][2] + Ue[2][node] * mult
+				verticei[2] * norm +
+					this.modifier[i][2] +
+					Ue[2][node] * mult * norm
 			);
 		}
 		parent_geometry.attributes.position.needsUpdate = true;
@@ -66,15 +72,21 @@ class Element {
 				const verticei = this.coords[node];
 				line_geometry.attributes.position.setX(
 					i,
-					verticei[0] + this.modifier[i][0] + Ue[0][node] * mult
+					verticei[0] * norm +
+						this.modifier[i][0] +
+						Ue[0][node] * mult * norm
 				);
 				line_geometry.attributes.position.setY(
 					i,
-					verticei[1] + this.modifier[i][1] + Ue[1][node] * mult
+					verticei[1] * norm +
+						this.modifier[i][1] +
+						Ue[1][node] * mult * norm
 				);
 				line_geometry.attributes.position.setZ(
 					i,
-					verticei[2] + this.modifier[i][2] + Ue[2][node] * mult
+					verticei[2] * norm +
+						this.modifier[i][2] +
+						Ue[2][node] * mult * norm
 				);
 			}
 			line_geometry.attributes.position.needsUpdate = true;

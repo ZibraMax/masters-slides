@@ -50,11 +50,12 @@ class FEMViewer {
 	camera;
 	scene;
 	controls;
-	constructor(canvas, magnif, rot) {
+	constructor(canvas, magnif, rot, axis = false) {
 		if (!magnif) {
 			magnif = 100;
 		}
 		// FEM
+		this.axis = axis;
 		this.canvas = canvas;
 		this.rot = rot;
 		this.nodes = [];
@@ -146,6 +147,7 @@ class FEMViewer {
 		this.U = undefined;
 		this.elements = [];
 		this.types = [];
+		this.magnif = 0.0;
 	}
 
 	settings() {
@@ -187,6 +189,8 @@ class FEMViewer {
 		this.sprite.scale.x = 0.125;
 		this.uiScene.add(this.sprite);
 
+		this.gh = new AxisGridHelper(this.scene, 0);
+		this.gh.visible = this.axis;
 		// GUI
 		this.gui
 			.add(this, "filename")
@@ -194,7 +198,9 @@ class FEMViewer {
 			.listen()
 			.onChange(this.reload.bind(this));
 		this.gui.add(this, "modalManager").name("Load JSON File");
+		this.gui.add(this.gh, "visible").name("Axis");
 		this.gui.add(this, "rot").name("Rotation").listen();
+
 		this.gui
 			.add(this, "draw_lines")
 			.onChange(this.updateLines.bind(this))
@@ -213,9 +219,10 @@ class FEMViewer {
 				}
 			});
 
-		this.gui
-			.add(this, "magnif", 0, 1000)
+		this.magnifSlider = this.gui
+			.add(this, "magnif", 0, 1)
 			.name("Disp multiplier")
+			.listen()
 			.onChange(() => {
 				this.updateMeshCoords();
 			});
@@ -329,6 +336,7 @@ class FEMViewer {
 				e.setGeometryCoords(
 					Ue,
 					this.magnif * this.mult,
+					this.norm,
 					this.bufferGeometries[i],
 					this.bufferLines[i]
 				);
@@ -336,6 +344,7 @@ class FEMViewer {
 				e.setGeometryCoords(
 					Ue,
 					this.magnif * this.mult,
+					this.norm,
 					this.bufferGeometries[i]
 				);
 			}
@@ -478,8 +487,6 @@ class FEMViewer {
 		this.mesh = new THREE.Mesh(this.mergedGeometry, this.material);
 		this.model.add(this.mesh);
 
-		// new AxisGridHelper(this.scene, 0);
-
 		this.scene.add(this.model);
 		this.renderer.render(this.scene, this.camera);
 		this.zoomExtents();
@@ -494,22 +501,25 @@ class FEMViewer {
 	}
 
 	parseJSON(jsondata) {
-		const norm = 1.0 / Math.max(...jsondata["nodes"].flat());
+		this.norm = 1.0 / Math.max(...jsondata["nodes"].flat());
 		// console.log(norm);
 		this.nodes = [];
 		this.nodes.push(...jsondata["nodes"]);
+		this.nodes_o = [];
+		this.nodes_o.push(...jsondata["nodes"]);
 
-		for (let i = 0; i < this.nodes.length; i++) {
-			const node = this.nodes[i];
-			for (let j = 0; j < node.length; j++) {
-				this.nodes[i][j] *= norm;
-			}
-		}
+		// for (let i = 0; i < this.nodes.length; i++) {
+		// 	const node = this.nodes[i];
+		// 	for (let j = 0; j < node.length; j++) {
+		// 		this.nodes[i][j] *= norm;
+		// 	}
+		// }
 		this.nvn = jsondata["nvn"];
 		this.ndim = this.nodes[0].length;
 		for (let i = 0; i < this.nodes.length; i++) {
 			for (let j = this.nodes[i].length; j < 3; j++) {
 				this.nodes[i].push(0.0); //Coordinate completition
+				this.nodes_o[i].push(0.0); //Coordinate completition
 			}
 		}
 		this.dictionary = [];
@@ -605,11 +615,11 @@ class FEMViewer {
 		this.info = Object.keys(this.solutions_info[this.step])[0];
 		this.infoDetail = this.solutions_info[this.step][this.info];
 
-		for (let s = 0; s < this.solutions.length; s++) {
-			for (let i = 0; i < this.solutions[s].length; i++) {
-				this.solutions[s][i] *= norm;
-			}
-		}
+		// for (let s = 0; s < this.solutions.length; s++) {
+		// 	for (let i = 0; i < this.solutions[s].length; i++) {
+		// 		this.solutions[s][i] *= norm;
+		// 	}
+		// }
 
 		const secon_coords = this.nodes[0].map((_, colIndex) =>
 			this.nodes.map((row) => row[colIndex])
@@ -638,6 +648,12 @@ class FEMViewer {
 
 	updateU() {
 		this.U = this.solutions[this.step];
+		const max_disp = Math.max(...this.U);
+		const min_disp = Math.min(...this.U);
+		const max_abs_disp =
+			Math.max(Math.abs(max_disp), Math.abs(min_disp)) * this.norm;
+		this.magnifSlider.min(-0.4 / max_abs_disp);
+		this.magnifSlider.max(0.4 / max_abs_disp);
 		for (const e of this.elements) {
 			e.setUe(this.U, true);
 		}
@@ -677,7 +693,7 @@ class FEMViewer {
 			this.elements[i] = new types[this.types[i]](
 				coords,
 				egdls,
-				this.size
+				this.size * this.norm
 			);
 			const colors = [];
 			for (
