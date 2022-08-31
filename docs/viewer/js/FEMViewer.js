@@ -74,8 +74,13 @@ class FEMViewer {
 		this.ndim = -1;
 
 		// THREE JS
-		this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+		this.renderer = new THREE.WebGLRenderer({
+			canvas,
+			antialias: true,
+			alpha: true,
+		});
 		this.renderer.autoClear = false;
+		this.renderer.setClearColor(0xffffff);
 
 		this.delta = 0;
 		this.interval = 1 / 120;

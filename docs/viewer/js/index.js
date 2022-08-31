@@ -78,3 +78,7 @@ function openFiles(evt) {
 }
 file_input.addEventListener("change", openFiles);
 console.log(O);
+function showPage() {
+	document.getElementById("loader").style.display = "none";
+}
+showPage();
