@@ -179,7 +179,7 @@ class FEMViewer {
 		this.scene.add(this.light2);
 
 		this.orthoCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 2);
-		this.orthoCamera.position.set(0.5, 0, 1);
+		this.orthoCamera.position.set(-0.9, 0, 1);
 		this.uiScene = new THREE.Scene();
 		this.sprite = new THREE.Sprite(
 			new THREE.SpriteMaterial({
@@ -411,7 +411,8 @@ class FEMViewer {
 		}
 		if (this.resizeRendererToDisplaySize()) {
 			const canvas = this.renderer.domElement;
-			this.camera.aspect = canvas.clientWidth / canvas.clientHeight;
+			const aspect = canvas.clientWidth / canvas.clientHeight;
+			this.camera.aspect = aspect;
 			this.camera.updateProjectionMatrix();
 		}
 		this.renderer.render(this.scene, this.camera);
