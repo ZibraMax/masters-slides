@@ -81,4 +81,13 @@ console.log(O);
 function showPage() {
 	document.getElementById("loader").style.display = "none";
 }
+function onDocumentKeyDown(event) {
+	const keyCode = event.which;
+	if (keyCode == 39) {
+		O.nextSolution();
+	} else if (keyCode == 37) {
+		O.prevSolution();
+	}
+}
 showPage();
+document.addEventListener("keydown", onDocumentKeyDown, false);
