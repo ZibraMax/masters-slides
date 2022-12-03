@@ -50,11 +50,12 @@ class FEMViewer {
 	camera;
 	scene;
 	controls;
-	constructor(canvas, magnif, rot, axis = false) {
+	constructor(canvas, magnif, rot, axis = false, iz = 1.05) {
 		if (!magnif) {
 			magnif = 100;
 		}
 		// FEM
+		this.initial_zoom = iz;
 		this.axis = axis;
 		this.canvas = canvas;
 		this.rot = rot;
@@ -450,7 +451,7 @@ class FEMViewer {
 		this.camera.getWorldDirection(cameraDir);
 
 		let cameraOffs = cameraDir.clone();
-		cameraOffs.multiplyScalar(-FL);
+		cameraOffs.multiplyScalar(-FL * this.initial_zoom);
 		let newCameraPos = bsWorld.clone().add(cameraOffs);
 
 		this.camera.position.copy(newCameraPos);
