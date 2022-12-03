@@ -3,6 +3,7 @@ let magnif = 600;
 let rot = false;
 let mode = 6;
 let axis = 6;
+let zoom = 1;
 
 let path_str =
 	"https://raw.githubusercontent.com/ZibraMax/masters-slides/main/results/SiCube_l3_0_0_500_L_25_884.json";
@@ -16,6 +17,7 @@ if (queryString != "") {
 	let rot_param = parametros.get("rot");
 	let mode_param = parametros.get("mode");
 	let axis_param = parametros.get("axis");
+	let zoom_param = parametros.get("zoom");
 	vis_param = parametros.get("menu");
 	if (funcion_param) {
 		path_str = funcion_param;
@@ -32,6 +34,9 @@ if (queryString != "") {
 	if (axis_param) {
 		axis = parseInt(axis_param);
 	}
+	if (zoom_param) {
+		zoom = 1 + parseFloat(zoom_param);
+	}
 }
 
 let path = `./resources/${path_str}.json`;
@@ -41,7 +46,7 @@ if (path_str.startsWith("https://")) {
 
 const canvas = document.getElementById("model-view");
 
-const O = new FEMViewer(canvas, magnif, rot, axis == 1);
+const O = new FEMViewer(canvas, magnif, rot, axis == 1, zoom);
 await O.loadJSON(path);
 O.init();
 O.setStep(mode);
