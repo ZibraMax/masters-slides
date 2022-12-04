@@ -37,7 +37,7 @@ if (queryString != "") {
 	if (zoom_param) {
 		zoom = 1 + parseFloat(zoom_param);
 	} else {
-		zomm = 1.05
+		zoom = 1.05
 	}
 }
 
