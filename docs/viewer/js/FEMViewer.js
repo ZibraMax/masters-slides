@@ -81,7 +81,6 @@ class FEMViewer {
 			alpha: true,
 		});
 		this.renderer.autoClear = false;
-		this.renderer.setClearColor(0xffffff);
 
 		this.delta = 0;
 		this.interval = 1 / 120;
@@ -160,7 +159,6 @@ class FEMViewer {
 		THREE.Object3D.DefaultUp = new THREE.Vector3(0, 0, 1);
 		// Scene settings
 		this.scene = new THREE.Scene();
-		this.scene.background = new THREE.Color(1, 1, 1);
 		// Camera settings
 		const fov = 40;
 		const aspect = 2; // the canvas default
