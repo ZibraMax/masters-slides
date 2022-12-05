@@ -81,7 +81,7 @@ class FEMViewer {
 			alpha: true,
 		});
 		this.renderer.autoClear = false;
-		this.renderer.setClearColor(0xffffff);
+		this.renderer.setClearColor( 0x000000, 0 );
 
 		this.delta = 0;
 		this.interval = 1 / 120;
