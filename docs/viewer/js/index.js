@@ -4,6 +4,7 @@ let rot = false;
 let mode = 6;
 let axis = 6;
 let zoom = 1;
+let lines = true;
 
 let path_str =
 	"https://raw.githubusercontent.com/ZibraMax/masters-slides/main/results/SiCube_l3_0_0_500_L_25_884.json";
@@ -18,6 +19,7 @@ if (queryString != "") {
 	let mode_param = parametros.get("mode");
 	let axis_param = parametros.get("axis");
 	let zoom_param = parametros.get("zoom");
+	let lines_param = parametros.get("lines");
 	vis_param = parametros.get("menu");
 	if (funcion_param) {
 		path_str = funcion_param;
@@ -37,7 +39,10 @@ if (queryString != "") {
 	if (zoom_param) {
 		zoom = 1 + parseFloat(zoom_param);
 	} else {
-		zoom = 1.05
+		zoom = 1.05;
+	}
+	if (lines_param) {
+		lines = false;
 	}
 }
 
@@ -49,6 +54,7 @@ if (path_str.startsWith("https://")) {
 const canvas = document.getElementById("model-view");
 
 const O = new FEMViewer(canvas, magnif, rot, axis == 1, zoom);
+O.draw_lines = lines;
 await O.loadJSON(path);
 O.init();
 O.setStep(mode);
