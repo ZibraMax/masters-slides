@@ -73,6 +73,7 @@ class FEMViewer {
 		this.info = "";
 		this.infoDetail = "";
 		this.ndim = -1;
+		this.border_elements = [];
 
 		// THREE JS
 		this.renderer = new THREE.WebGLRenderer({
@@ -531,9 +532,16 @@ class FEMViewer {
 		this.types = [];
 		this.solutions_info = [];
 		this.solutions = [];
-
-		this.dictionary.push(...jsondata["dictionary"]);
+		let original_dict = jsondata["dictionary"];
+		this.dictionary.push(...original_dict);
 		this.types.push(...jsondata["types"]);
+		if (jsondata["border_elements"]) {
+			this.border_elements.push(...jsondata["border_elements"]);
+			this.dictionary = [];
+			for (const be of this.border_elements) {
+				this.dictionary.push(original_dict[be]);
+			}
+		}
 		if (!jsondata["solutions"]) {
 			if (!jsondata["disp_field"] || jsondata["disp_field"].length == 0) {
 				this.solutions = [
